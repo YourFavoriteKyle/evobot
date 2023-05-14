@@ -42,8 +42,6 @@ export class Bot {
   }
 
   private async registerSlashCommands() {
-    const rest = new REST({ version: "9" }).setToken(config.TOKEN);
-
     const commandFiles = readdirSync(join(__dirname, "..", "commands")).filter((file) => !file.endsWith(".map"));
 
     for (const file of commandFiles) {
@@ -53,7 +51,11 @@ export class Bot {
       this.slashCommandsMap.set(command.default.data.name, command.default);
     }
 
-    await rest.put(Routes.applicationCommands(this.client.user!.id), { body: this.slashCommands });
+    if (config.REGISTER_COMMANDS) {
+      const rest = new REST({ version: "9" }).setToken(config.TOKEN);
+
+      await rest.put(Routes.applicationCommands(this.client.user!.id), { body: this.slashCommands });
+    }
   }
 
   private async onInteractionCreate() {
